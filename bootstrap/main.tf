@@ -1,10 +1,10 @@
 # 장부(state)를 보관할 버킷
 resource "aws_s3_bucket" "tfstate" {
-  bucket = "culonculon-tfstate-1"   # 전 세계에서 하나뿐이어야 함
+    bucket = "culonculon-aws-infra-portfolio-tfstate"   # 전 세계에서 하나뿐이어야 함
 
   # destroy를 해도 이 버킷은 지워지지 않게 막음
   lifecycle {
-    prevent_destroy = true
+    prevent_destroy = true    
   }
 }
 
