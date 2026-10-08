@@ -6,7 +6,7 @@ resource "aws_vpc" "main" {
 
 # VPC 오리진 요구 사항: VPC에 인터넷 게이트웨이가 있어야 함
 resource "aws_internet_gateway" "main" {
-  vpc_id = aws_vpc.main.id    # ← "VPC의 id가 필요해" → VPC를 먼저 만들어야 함
+  vpc_id = aws_vpc.main.id # ← "VPC의 id가 필요해" → VPC를 먼저 만들어야 함
 }
 
 # 서버가 들어갈 프라이빗 서브넷 (공인 IP 안 줌)
