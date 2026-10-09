@@ -33,4 +33,17 @@ resource "aws_vpc_endpoint" "s3" {
   service_name      = "com.amazonaws.ap-northeast-2.s3"
   vpc_endpoint_type = "Gateway"
   route_table_ids   = [aws_route_table.private.id]
+
+  # 이 지름길로는 AL2023 패키지 저장소만, 읽기만 허용
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid       = "AL2023RepoReadOnly"
+      Effect    = "Allow"
+      Principal = "*"
+      Action    = "s3:GetObject"
+      Resource  = "arn:aws:s3:::al2023-repos-ap-northeast-2-de612dc2/*"
+    }]
+  })
+
 }
