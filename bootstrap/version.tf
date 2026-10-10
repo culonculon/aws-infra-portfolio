@@ -5,14 +5,14 @@ terraform {
   # 이 코드가 쓰는 확장팩(provider)과 허용 버전
   required_providers {
     aws = {
-      source  = "hashicorp/aws"   # 어디서 받아 올지 (Terraform Registry 주소)
-      version = "~> 6.0"          # 6점대만 허용
+      source  = "hashicorp/aws" # 어디서 받아 올지 (Terraform Registry 주소)
+      version = "~> 6.0"        # 6점대만 허용
     }
   }
 }
 
 provider "aws" {
-  region = "ap-northeast-2"   # 서울
+  region = "ap-northeast-2" # 서울
 
   # 이 폴더에서 만드는 모든 자원에 자동으로 붙는 이름표
   default_tags {
