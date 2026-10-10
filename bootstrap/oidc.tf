@@ -20,7 +20,7 @@ resource "aws_iam_role" "github_deploy" {
       Condition = {
         StringEquals = {
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
-          "token.actions.githubusercontent.com:sub" = "repo:culonculon/aws-infra-portfolio:ref:refs/heads/main" # 진짜 자물쇠
+          "token.actions.githubusercontent.com:sub" = "repo:culonculon@162904282/aws-infra-portfolio@1400854727:ref:refs/heads/main" # 진짜 자물쇠
         }
       }
     }]
