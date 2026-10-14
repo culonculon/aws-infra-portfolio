@@ -30,6 +30,7 @@ flowchart LR
 
 | 쓰지 않은 것 | 대신 쓴 것 | 이유 |
 | --- | --- | --- |
+| S3 정적 호스팅 | EC2 + nginx | 정적 페이지만이라면 S3가 더 싸고 단순하다. 서버를 직접 운영하는 모습을 보여 주려고 일부러 서버를 두었다. |
 | NAT Gateway | S3 gateway endpoint (패키지 저장소만) | 밖에서 받을 것은 OS 패키지뿐이라 무료 출구 하나면 충분하다. |
 | ALB | CloudFront VPC origin | 서버가 한 대라 부하 분산이 필요 없고, HTTPS는 CloudFront가 맡는다. |
 | 서버 공인 IP | 프라이빗 서브넷 + CloudFront에서 80번만 | 서버에 직접 닿는 길을 없애고 공인 IPv4 요금도 아낀다. |
