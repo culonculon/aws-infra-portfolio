@@ -1,0 +1,55 @@
+# PR마다 infra/의 plan만 보여 준다 (CAREER-25) — apply는 deploy.yml(main)만
+name: plan
+
+on:
+  pull_request:
+    paths:
+      - "infra/**"
+      - ".github/workflows/plan.yml"
+
+permissions:
+  id-token: write # OIDC (포크 PR은 토큰을 못 받음)
+  contents: read
+
+concurrency:
+  group: plan-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  plan:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: infra
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_PLAN_ROLE_ARN }}
+          aws-region: ap-northeast-2
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.13.1
+          terraform_wrapper: false
+
+      - run: terraform init -input=false
+      - run: terraform fmt -check
+      - run: terraform validate
+      - name: terraform plan
+        run: |
+          set -o pipefail
+          terraform plan -input=false -lock-timeout=60s -no-color -out=tfplan | tee plan.txt
+          echo "### terraform plan" >> "$GITHUB_STEP_SUMMARY"
+          grep -E '^(Plan:|No changes)' plan.txt >> "$GITHUB_STEP_SUMMARY" || true
+
+      # 원래 있던 HIGH 2건(CloudFront WAF · S3 고객 관리 키)이 있어 지금은 보고만 한다
+      # trivy-action 0.0.1~0.34.2 태그는 2026-03 공급망 공격으로 오염됨(CVE-2026-33634) — 사고 뒤 릴리스 SHA로 고정
+      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: "0"
