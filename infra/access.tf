@@ -45,3 +45,12 @@ output "eic_endpoint_id" {
 output "web_instance_id" {
   value = aws_instance.web.id
 }
+
+# how-much 저장소 변수 EIC_DNS_NAME · DEPLOY_PRIVATE_IP용(터널을 열 때 Describe 없이 — how-much PR #17)
+output "eic_dns_name" {
+  value = aws_ec2_instance_connect_endpoint.main.dns_name
+}
+
+output "web_private_ip" {
+  value = aws_instance.web.private_ip
+}
