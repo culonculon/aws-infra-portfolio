@@ -73,5 +73,11 @@ resource "aws_instance" "web" {
   tags = {
     Name = "portfolio-web"
   }
+
+  # 서버 교체·삭제 막기(CAREER-30, how-much plan D7) — 루트 디스크 홈에 how-much 하루 셈 파일이 있다.
+  # user_data·AMI를 바꾸면 교체 plan이 생기는데, 그때 plan이 오류로 멈춘다. v1을 내리려면 이 줄을 먼저 지우는 PR이 필요하다
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
