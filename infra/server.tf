@@ -44,6 +44,7 @@ resource "aws_instance" "web" {
   instance_type          = "t4g.small"
   subnet_id              = aws_subnet.private.id
   vpc_security_group_ids = [aws_security_group.web.id]
+  iam_instance_profile   = aws_iam_instance_profile.web.name # Bedrock 부르기(bedrock.tf) — 붙여도 서버는 그대로
 
 
   # CPU 크레딧을 넘겨 써도 추가 요금이 안 나가게 (t4g 기본값은 unlimited)
