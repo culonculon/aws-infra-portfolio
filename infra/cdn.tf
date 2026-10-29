@@ -3,6 +3,31 @@ data "aws_cloudfront_cache_policy" "optimized" {
   name = "Managed-CachingOptimized"
 }
 
+# (옆) how-much 감정 입구 /api/* 는 캐시하지 않음 — 읽기만
+data "aws_cloudfront_cache_policy" "disabled" {
+  name = "Managed-CachingDisabled"
+}
+
+# how-much /api/* 가 원본에 넘길 것: 쿼리 전부 + 헤더 둘(how-much contracts/deploy.md §3)
+# CloudFront-Viewer-Address = 사람별 요청 수 제한의 '사람'(how-much ADR-0006). 쿠키 없음
+resource "aws_cloudfront_origin_request_policy" "how_much_api" {
+  name    = "how-much-api"
+  comment = "how-much /api/*: all query strings, Content-Type, CloudFront-Viewer-Address"
+
+  cookies_config {
+    cookie_behavior = "none"
+  }
+  headers_config {
+    header_behavior = "whitelist"
+    headers {
+      items = ["Content-Type", "CloudFront-Viewer-Address"]
+    }
+  }
+  query_strings_config {
+    query_string_behavior = "all"
+  }
+}
+
 # 4. 전용 출입문: CloudFront → 프라이빗 서버 (AWS 내부망으로만)
 resource "aws_cloudfront_vpc_origin" "web" {
   vpc_origin_endpoint_config {
@@ -45,6 +70,19 @@ resource "aws_cloudfront_distribution" "web" {
     cached_methods         = ["GET", "HEAD"]
     cache_policy_id        = data.aws_cloudfront_cache_policy.optimized.id
     compress               = true
+  }
+
+  # how-much 감정 입구: /api/* → 같은 원본(서버 nginx가 127.0.0.1:8787로 넘김). 이 동작이 생기는 때 = 공개
+  # 원본·기본 동작은 바꾸지 않는다. 원본 응답 시간 제한은 원본 기본 30초(how-much contracts/deploy.md §3)
+  ordered_cache_behavior {
+    path_pattern             = "/api/*"
+    target_origin_id         = "portfolio-web"
+    viewer_protocol_policy   = "redirect-to-https"
+    allowed_methods          = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    cached_methods           = ["GET", "HEAD"]
+    cache_policy_id          = data.aws_cloudfront_cache_policy.disabled.id
+    origin_request_policy_id = aws_cloudfront_origin_request_policy.how_much_api.id
+    compress                 = false
   }
 
   restrictions {
