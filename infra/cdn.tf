@@ -72,7 +72,7 @@ resource "aws_cloudfront_distribution" "web" {
     compress               = true
   }
 
-  # how-much 감정 입구: /api/* → 같은 원본(서버 nginx가 127.0.0.1:8787로 넘김). 이 동작이 생기는 때 = 공개
+  # how-much 감정 입구: /api/* → 같은 원본(서버 nginx가 같은 컴퓨터의 api로 넘김). 이 동작이 생기는 때 = 공개
   # 원본·기본 동작은 바꾸지 않는다. 원본 응답 시간 제한은 원본 기본 30초(how-much contracts/deploy.md §3)
   ordered_cache_behavior {
     path_pattern             = "/api/*"
