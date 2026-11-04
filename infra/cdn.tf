@@ -50,7 +50,8 @@ resource "aws_cloudfront_distribution" "web" {
   enabled             = true
   comment             = "portfolio-web"
   default_root_object = "index.html"
-  price_class         = "PriceClass_200" # 한국 포함, 가장 비싼 지역 제외
+  price_class         = "PriceClass_200"          # 한국 포함, 가장 비싼 지역 제외
+  web_acl_id          = aws_wafv2_web_acl.web.arn # waf.tf (CAREER-28)
 
   # 원본 주소록: 302호(서버 주소)로, 전용 출입문을 통해
   origin {
