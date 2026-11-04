@@ -46,11 +46,11 @@ jobs:
           grep -E '^(Plan:|No changes)' plan.txt >> "$GITHUB_STEP_SUMMARY" || true
 
       # HIGH · CRITICAL이 하나라도 있으면 막는다(CAREER-28). 남길 항목은 .trivyignore에 이유와 함께
-      # trivy-action 0.0.1~0.34.2 태그는 2026-03 공급망 공격으로 오염됨(CVE-2026-33634) — 사고 뒤 릴리스 SHA로 고정
-      - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-        with:
-          scan-type: config
-          scan-ref: .
-          severity: HIGH,CRITICAL
-          exit-code: "1"
-          version: v0.76.1 # 기본값(v0.70.0)은 11/4 설치 단계가 exit 6으로 실패 — 받을 판을 못 박음
+      # trivy-action(v0.36.0)은 11/4 설치 단계(setup-trivy install.sh)가 exit 6으로 실패 → 공식 이미지를 digest로 고정해 바로 돌린다
+      # (2026-03 trivy-action 태그 오염 사고(CVE-2026-33634) 뒤라 태그가 아닌 digest로)
+      - name: trivy config (HIGH, CRITICAL)
+        working-directory: .
+        run: |
+          docker run --rm -v "$PWD:/src:ro" \
+            aquasec/trivy:0.76.1@sha256:790fd66d1697395d8693d1acaa1ea702406a20f109b6fc7bac8db623eca6c06c \
+            config --severity HIGH,CRITICAL --exit-code 1 /src
