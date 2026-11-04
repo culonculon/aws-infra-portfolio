@@ -24,7 +24,7 @@ resource "aws_wafv2_web_acl" "web" {
   provider = aws.us_east_1
 
   name        = "portfolio-web"
-  description = "CloudFront portfolio-web: IP reputation + /api/* rate limit"
+  description = "CloudFront portfolio-web: IP reputation, api rate limit" # 설명에 * 못 씀(WAF 글자 규칙)
   scope       = "CLOUDFRONT"
 
   default_action {
