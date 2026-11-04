@@ -16,13 +16,15 @@ resource "aws_s3_bucket_versioning" "tfstate" {
   }
 }
 
-# 암호화
+# 암호화 — 고객 관리 키(kms.tf)
 resource "aws_s3_bucket_server_side_encryption_configuration" "tfstate" {
   bucket = aws_s3_bucket.tfstate.id
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.tfstate.arn # kms.tf (CAREER-28)
     }
+    bucket_key_enabled = true
   }
 }
 
