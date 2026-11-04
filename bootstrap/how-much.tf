@@ -26,8 +26,10 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "how_much_tfstate"
   bucket = aws_s3_bucket.how_much_tfstate.id
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.tfstate.arn # kms.tf (CAREER-28)
     }
+    bucket_key_enabled = true
   }
 }
 
@@ -97,6 +99,20 @@ resource "aws_iam_role_policy" "how_much_plan_state" {
         Effect   = "Allow"
         Action   = ["s3:PutObject", "s3:DeleteObject"]
         Resource = "${aws_s3_bucket.how_much_tfstate.arn}/*.tflock"
+      },
+      {
+        # 장부 버킷이 고객 관리 키로 암호화됨(kms.tf) — 읽기(Decrypt) · 잠금 파일 쓰기(GenerateDataKey)
+        # S3를 거칠 때만, 이 버킷 것만
+        Sid      = "HowMuchStateKey"
+        Effect   = "Allow"
+        Action   = ["kms:Decrypt", "kms:GenerateDataKey"]
+        Resource = aws_kms_key.tfstate.arn
+        Condition = {
+          StringEquals = {
+            "kms:ViaService"                   = "s3.${data.aws_region.current.region}.amazonaws.com"
+            "kms:EncryptionContext:aws:s3:arn" = aws_s3_bucket.how_much_tfstate.arn
+          }
+        }
       },
     ]
   })

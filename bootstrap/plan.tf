@@ -58,6 +58,20 @@ resource "aws_iam_role_policy" "portfolio_plan_state" {
         Action   = ["s3:PutObject", "s3:DeleteObject"]
         Resource = "${aws_s3_bucket.tfstate.arn}/infra/*.tflock"
       },
+      {
+        # 장부 버킷이 고객 관리 키로 암호화됨(kms.tf) — 읽기(Decrypt) · 잠금 파일 쓰기(GenerateDataKey)
+        # S3를 거칠 때만, 이 버킷 것만
+        Sid      = "PortfolioStateKey"
+        Effect   = "Allow"
+        Action   = ["kms:Decrypt", "kms:GenerateDataKey"]
+        Resource = aws_kms_key.tfstate.arn
+        Condition = {
+          StringEquals = {
+            "kms:ViaService"                   = "s3.${data.aws_region.current.region}.amazonaws.com"
+            "kms:EncryptionContext:aws:s3:arn" = aws_s3_bucket.tfstate.arn
+          }
+        }
+      },
     ]
   })
 }
