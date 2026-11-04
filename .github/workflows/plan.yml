@@ -45,11 +45,11 @@ jobs:
           echo "### terraform plan" >> "$GITHUB_STEP_SUMMARY"
           grep -E '^(Plan:|No changes)' plan.txt >> "$GITHUB_STEP_SUMMARY" || true
 
-      # 원래 있던 HIGH 2건(CloudFront WAF · S3 고객 관리 키)이 있어 지금은 보고만 한다
+      # HIGH · CRITICAL이 하나라도 있으면 막는다(CAREER-28). 남길 항목은 .trivyignore에 이유와 함께
       # trivy-action 0.0.1~0.34.2 태그는 2026-03 공급망 공격으로 오염됨(CVE-2026-33634) — 사고 뒤 릴리스 SHA로 고정
       - uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: config
           scan-ref: .
           severity: HIGH,CRITICAL
-          exit-code: "0"
+          exit-code: "1"
